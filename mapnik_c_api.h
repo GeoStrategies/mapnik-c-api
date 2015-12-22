@@ -72,6 +72,8 @@ MAPNIKCAPICALL int mapnik_map_load(mapnik_map_t * m, const char* stylesheet);
 
 MAPNIKCAPICALL int mapnik_map_load_string(mapnik_map_t * m, const char* stylesheet_string);
 
+MAPNIKCAPICALL mapnik_map_t * mapnik_map_copy(mapnik_map_t * m);
+
 MAPNIKCAPICALL int mapnik_map_zoom_all(mapnik_map_t * m);
 
 MAPNIKCAPICALL int mapnik_map_render_to_file(mapnik_map_t * m, const char* filepath);

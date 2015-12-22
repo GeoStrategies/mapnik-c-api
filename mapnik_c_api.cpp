@@ -1,5 +1,7 @@
 #include <mapnik/version.hpp>
 #include <mapnik/map.hpp>
+#include <mapnik/layer.hpp>
+#include <mapnik/feature_type_style.hpp>
 #include <mapnik/color.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/agg_renderer.hpp>
@@ -117,6 +119,25 @@ int mapnik_map_load_string(mapnik_map_t * m, const char* stylesheet_string) {
         return 0;
     }
     return -1;
+}
+
+mapnik_map_t * mapnik_map_copy(mapnik_map_t * src) {
+    mapnik_map_t * map = new mapnik_map_t;
+    map->m = new mapnik::Map(src->m->width(), src->m->height());
+    map->err = NULL;
+    map->m->set_srs(src->m->srs().c_str());
+
+    std::vector<mapnik::layer> layers = src->m->layers();
+    for(uint i=0; i < layers.size(); i++) {
+        map->m->add_layer(layers[i]);
+    }
+
+    typedef std::map<std::string, mapnik::feature_type_style>::iterator it_type;
+    for(it_type iterator = src->m->begin_styles(); iterator != src->m->end_styles(); iterator++) {
+        map->m->insert_style(iterator->first, iterator->second);
+    }
+
+    return map;
 }
 
 int mapnik_map_zoom_all(mapnik_map_t * m) {

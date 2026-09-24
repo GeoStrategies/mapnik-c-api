@@ -1,13 +1,13 @@
 # mapnik-c-api
 
-[![Build Status](https://travis-ci.org/springmeyer/mapnik-c-api.svg?branch=master)](https://travis-ci.org/springmeyer/mapnik-c-api)
+[![test](https://github.com/GeoStrategies/mapnik-c-api/actions/workflows/test.yml/badge.svg)](https://github.com/GeoStrategies/mapnik-c-api/actions/workflows/test.yml)
 
 A C API to Mapnik
 
 ## Depends
 
- - Mapnik 3.x or 2.x
- - C++11 capable compiler if targeting Mapnik 3.x
+ - Mapnik 4.x, 3.x or 2.x
+ - C++17 capable compiler if targeting Mapnik 4.x, C++11 for Mapnik 3.x
 
 ## Build
 

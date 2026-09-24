@@ -1,0 +1,19 @@
+name: test
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # Debian 12 ships Mapnik 3.1 on the PROJ 9 API, Debian 13 ships Mapnik 4
+        debian: ['12', '13']
+    container: debian:${{ matrix.debian }}
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install Mapnik
+        run: apt-get update && apt-get install -y g++ make libmapnik-dev
+      - name: Test
+        run: make test

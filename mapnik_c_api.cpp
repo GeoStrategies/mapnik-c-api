@@ -124,20 +124,8 @@ int mapnik_map_load_string(mapnik_map_t * m, const char* stylesheet_string) {
 mapnik_map_t * mapnik_map_copy(mapnik_map_t * src) {
     if (!src || !src->m) return NULL;
     mapnik_map_t * map = new mapnik_map_t;
-    map->m = new mapnik::Map(src->m->width(), src->m->height());
+    map->m = new mapnik::Map(*src->m);
     map->err = NULL;
-    map->m->set_srs(src->m->srs().c_str());
-
-    std::vector<mapnik::layer> layers = src->m->layers();
-    for(uint i=0; i < layers.size(); i++) {
-        map->m->add_layer(layers[i]);
-    }
-
-    typedef std::map<std::string, mapnik::feature_type_style>::iterator it_type;
-    for(it_type iterator = src->m->begin_styles(); iterator != src->m->end_styles(); iterator++) {
-        map->m->insert_style(iterator->first, iterator->second);
-    }
-
     return map;
 }
 

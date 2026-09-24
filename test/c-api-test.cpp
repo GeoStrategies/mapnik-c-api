@@ -108,3 +108,25 @@ TEST_CASE( "map/null", "should not dereference a null map" ) {
       REQUIRE( mapnik_map_render_to_image(NULL) == NULL );
       mapnik_map_set_buffer_size(NULL, 128);
 }
+
+TEST_CASE( "map/copy", "should copy everything the map was loaded with" ) {
+      mapnik_map_t * map;
+      map = mapnik_map(256,256);
+      mapnik_register_datasources(MAPNIK_PLUGINDIR, NULL);
+      REQUIRE_FALSE(mapnik_map_load(map,"sample/stylesheet.xml"));
+      mapnik_map_zoom_all(map);
+      mapnik_map_t * copy = mapnik_map_copy(map);
+      REQUIRE( 0==strcmp(mapnik_map_get_srs(copy),mapnik_map_get_srs(map)) );
+      mapnik_image_t * i1 = mapnik_map_render_to_image(map);
+      mapnik_image_t * i2 = mapnik_map_render_to_image(copy);
+      mapnik_image_blob_t * b1 = mapnik_image_to_png_blob(i1);
+      mapnik_image_blob_t * b2 = mapnik_image_to_png_blob(i2);
+      REQUIRE( b1->len == b2->len );
+      REQUIRE( 0==memcmp(b1->ptr,b2->ptr,b1->len) );
+      mapnik_image_blob_free(b1);
+      mapnik_image_blob_free(b2);
+      mapnik_image_free(i1);
+      mapnik_image_free(i2);
+      mapnik_map_free(copy);
+      mapnik_map_free(map);
+}

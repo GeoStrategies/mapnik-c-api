@@ -86,7 +86,7 @@ const char * mapnik_map_get_srs(mapnik_map_t * m) {
 }
 
 int mapnik_map_set_srs(mapnik_map_t * m, const char* srs) {
-    if (m) {
+    if (m && m->m) {
         m->m->set_srs(srs);
         return 0;
     }
@@ -122,6 +122,7 @@ int mapnik_map_load_string(mapnik_map_t * m, const char* stylesheet_string) {
 }
 
 mapnik_map_t * mapnik_map_copy(mapnik_map_t * src) {
+    if (!src || !src->m) return NULL;
     mapnik_map_t * map = new mapnik_map_t;
     map->m = new mapnik::Map(src->m->width(), src->m->height());
     map->err = NULL;
@@ -180,7 +181,9 @@ void mapnik_map_resize(mapnik_map_t *m, unsigned int width, unsigned int height)
 
 
 MAPNIKCAPICALL void mapnik_map_set_buffer_size(mapnik_map_t * m, int buffer_size) {
-    m->m->set_buffer_size(buffer_size);
+    if (m && m->m) {
+        m->m->set_buffer_size(buffer_size);
+    }
 }
 
 const char *mapnik_map_last_error(mapnik_map_t *m) {
@@ -253,16 +256,15 @@ void mapnik_image_free(mapnik_image_t * i) {
 
 mapnik_image_t * mapnik_map_render_to_image(mapnik_map_t * m) {
     mapnik_map_reset_last_error(m);
+    if (!m || !m->m) return NULL;
     mapnik_image_type * im = new mapnik_image_type(m->m->width(), m->m->height());
-    if (m && m->m) {
-        try {
-            mapnik::agg_renderer<mapnik_image_type> ren(*m->m,*im);
-            ren.apply();
-        } catch (std::exception const& ex) {
-            delete im;
-            m->err = new std::string(ex.what());
-            return NULL;
-        }
+    try {
+        mapnik::agg_renderer<mapnik_image_type> ren(*m->m,*im);
+        ren.apply();
+    } catch (std::exception const& ex) {
+        delete im;
+        m->err = new std::string(ex.what());
+        return NULL;
     }
     mapnik_image_t * i = new mapnik_image_t;
     i->i = im;

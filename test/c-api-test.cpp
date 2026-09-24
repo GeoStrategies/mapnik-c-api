@@ -101,3 +101,10 @@ TEST_CASE( "map/last_error", "should return errors" ) {
 
       mapnik_map_free(map);
 }
+
+TEST_CASE( "map/null", "should not dereference a null map" ) {
+      REQUIRE( mapnik_map_set_srs(NULL, "+proj=longlat +datum=WGS84 +no_defs") == -1 );
+      REQUIRE( mapnik_map_copy(NULL) == NULL );
+      REQUIRE( mapnik_map_render_to_image(NULL) == NULL );
+      mapnik_map_set_buffer_size(NULL, 128);
+}

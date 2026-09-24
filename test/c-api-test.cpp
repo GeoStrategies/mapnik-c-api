@@ -16,7 +16,7 @@ TEST_CASE( "map/srs", "should get/set srs string" ) {
       mapnik_map_t * map;
       map = mapnik_map(256,256);
       const char *srs = mapnik_map_get_srs(map);
-      REQUIRE( 0==strcmp(srs,"+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs") );
+      REQUIRE( (0==strcmp(srs,"+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs") || 0==strcmp(srs,"epsg:4326")) );
       mapnik_map_set_srs(map,"+init=epsg:4326");
       const char *srs2 = mapnik_map_get_srs(map);
       REQUIRE( 0==strcmp(srs2,"+init=epsg:4326") );
@@ -128,5 +128,18 @@ TEST_CASE( "map/copy", "should copy everything the map was loaded with" ) {
       mapnik_image_free(i1);
       mapnik_image_free(i2);
       mapnik_map_free(copy);
+      mapnik_map_free(map);
+}
+
+TEST_CASE( "projection/forward", "should project lon/lat degrees into the map srs" ) {
+      mapnik_map_t * map;
+      map = mapnik_map(256,256);
+      mapnik_map_set_srs(map,"+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs");
+      mapnik_projection_t * proj = mapnik_map_projection(map);
+      mapnik_coord_t c = {-122.4194, 37.7749};
+      c = mapnik_projection_forward(proj, c);
+      REQUIRE( c.x == Approx(-13627665.27).epsilon(1e-9) );
+      REQUIRE( c.y == Approx(4547675.35).epsilon(1e-9) );
+      mapnik_projection_free(proj);
       mapnik_map_free(map);
 }

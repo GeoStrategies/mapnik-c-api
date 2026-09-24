@@ -9,6 +9,11 @@
 #include <mapnik/datasource_cache.hpp>
 #include <mapnik/projection.hpp>
 #include <mapnik/font_engine_freetype.hpp>
+#include <mapnik/proj_transform.hpp>
+
+#if MAPNIK_VERSION >= 400000
+#include <mapnik/proj_transform_cache.hpp>
+#endif
 
 #if MAPNIK_VERSION >= 300000
 #include <mapnik/image.hpp>
@@ -205,7 +210,15 @@ void mapnik_projection_free(mapnik_projection_t *p) {
 
 mapnik_coord_t mapnik_projection_forward(mapnik_projection_t *p, mapnik_coord_t c) {
     if (p && p->p) {
-        p->p->forward(c.x, c.y);
+        // projection::forward expects radians on the PROJ 6+ API; a transform from lon/lat takes degrees on every version
+        double z = 0;
+#if MAPNIK_VERSION >= 400000
+        mapnik::proj_transform_cache::get("+proj=longlat +datum=WGS84 +no_defs", p->p->params())->forward(c.x, c.y, z);
+#else
+        mapnik::projection lonlat("+proj=longlat +datum=WGS84 +no_defs");
+        mapnik::proj_transform tr(lonlat, *p->p);
+        tr.forward(c.x, c.y, z);
+#endif
     }
     return c;
 }

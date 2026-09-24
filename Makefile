@@ -5,10 +5,21 @@ CXXFLAGS := $(CXXFLAGS) -Wall -pedantic
 CFLAGS := $(CFLAGS) -Wall -pedantic -std=c99
 LDFLAGS := $(LDFLAGS)
 
-# mapnik settings
+# mapnik settings: mapnik-config up to Mapnik 3, the CMake package config from Mapnik 4
+ifneq ($(shell command -v mapnik-config),)
 MAPNIK_CXXFLAGS := $(shell mapnik-config --cflags)
 MAPNIK_LDFLAGS := $(shell mapnik-config --libs)
 MAPNIK_PLUGINDIR := $(shell mapnik-config --input-plugins)
+else
+MAPNIK_CMAKE_DIR := $(shell dirname "$$(find /usr/lib /usr/local/lib -name mapnikTargets.cmake 2>/dev/null | head -1)")
+ifeq ($(MAPNIK_CMAKE_DIR),.)
+$(error found neither mapnik-config nor the Mapnik CMake package config)
+endif
+MAPNIK_PREFIX := $(abspath $(MAPNIK_CMAKE_DIR)/../../../..)
+MAPNIK_CXXFLAGS := -std=c++17 $(shell sed -n 's/.*INTERFACE_COMPILE_DEFINITIONS "\(.*\)"/\1/p' $(MAPNIK_CMAKE_DIR)/mapnikTargets.cmake | tr ';' '\n' | sort -u | sed 's/^/-D/')
+MAPNIK_LDFLAGS := -lmapnik
+MAPNIK_PLUGINDIR := $(MAPNIK_PREFIX)$(shell sed -n 's|.*MAPNIK_PLUGINS_DIR_[A-Z]* "$${PACKAGE_PREFIX_DIR}\([^"]*\)".*|\1|p' $(MAPNIK_CMAKE_DIR)/mapnikPlugins-*.cmake | head -1)
+endif
 
 OS:=$(shell uname -s)
 ifeq ($(OS),Darwin)

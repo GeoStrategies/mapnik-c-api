@@ -6,8 +6,8 @@ A C API to Mapnik
 
 ## Depends
 
- - Mapnik 3.x or 2.x
- - C++11 capable compiler if targeting Mapnik 3.x
+ - Mapnik 4.x, 3.x or 2.x
+ - C++17 capable compiler if targeting Mapnik 4.x, C++11 for Mapnik 3.x
 
 ## Build
 
